@@ -1,0 +1,2 @@
+class Barrel:
+    pass
