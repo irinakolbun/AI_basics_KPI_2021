@@ -26,7 +26,7 @@ class GameLoop:
             pygame.display.set_caption("Donkey Kong")
 
             while True:
-                event = pygame.event.wait()
+                event = pygame.event.wait(10)
                 if event.type == pygame.QUIT:
                     break
 
@@ -39,7 +39,9 @@ class GameLoop:
                     print(f'resized screen to {factor} factor')
                     self._screen = pygame.display.set_mode((round(256 * factor), round(240 * factor)), pygame.RESIZABLE)
 
-                self._surface.blit(self._mario.get_standing(), (0, 0))
+                # update Mario's sprite
+                self._surface.blit(self._mario.get_cur_sprite(self._clock.get_time()), self._mario.get_position())
+
                 self._screen.blit(pygame.transform.scale(self._surface, self._screen.get_rect().size), (0, 0))
                 pygame.display.flip()
                 self._clock.tick(60)
