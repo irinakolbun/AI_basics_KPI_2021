@@ -18,7 +18,19 @@ class GameLoop:
         self._surface = pygame.surface.Surface((256, 240))
 
     def _key_handler(self, event: pygame.event.Event):
-        pass
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RIGHT:
+                self._mario.next_state('go_right')
+            if event.key == pygame.K_LEFT:
+                self._mario.next_state('go_left')
+            if event.key == pygame.K_UP:
+                self._mario.next_state('jump')
+
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_RIGHT:
+                self._mario.next_state('stand')
+            if event.key == pygame.K_LEFT:
+                self._mario.next_state('stand')
 
     def run(self):
         try:
@@ -45,6 +57,7 @@ class GameLoop:
                 self._surface.blit(level, (0, 0))
 
                 # update Mario's sprite
+                self._mario.move()
                 self._surface.blit(self._mario.get_cur_sprite(self._clock.get_time()), self._mario.get_position())
 
                 self._screen.blit(pygame.transform.scale(self._surface, self._screen.get_rect().size), (0, 0))

@@ -12,12 +12,27 @@ class Mario:
         self._animation_state = 'walk_right'
         self._animation_advance = 0
         self._animation_frame = 0
+        self._animation_direction = 'right'
 
-        self._position = {'x': 16, 'y': 240-16-8}
+        self._position = {'x': 16, 'y': 240-16-8, 'floor': 1}
+        self._state = 'stand'
+        self._walk_speed = 1
+        self._x_speed = 0
+        self._x_advance = 0
 
-    def _get_sprite(self, num, wh):
-        block_wh = 40
-        return self._sprites.image_at(Rect(block_wh * (num % 8), block_wh * (num // 8), wh, wh), 0)
+        self._state_transitions = {
+            ('stand', 'go_right'): self._go_right,
+            ('stand', 'go_left'): self._go_left,
+            ('go_left', 'go_right'): self._go_right,
+            ('go_right', 'go_left'): self._go_left,
+            ('go_left', 'stand'): self._stand,
+            ('go_right', 'stand'): self._stand,
+            ('stand', 'stand'): self._stand,
+        }
+
+    def next_state(self, state):
+        self._state_transitions.get((self._state, state),
+                                    lambda: print(f'No state transition "{self._state} => {state}"'))()
 
     def get_cur_sprite(self, advance):
         advance /= 1000
@@ -29,7 +44,58 @@ class Mario:
             self._animation_advance += advance
         return self._animations[self._animation_state][self._animation_frame]['sprite']
 
-    def set_sprite(self, sprite_name):
+    def move(self):
+        # x movement
+        self._x_advance += self._x_speed
+        if abs(self._x_advance) >= 1:
+            if self._x_advance >= 0:
+                if not self._position['x'] >= 240 - 16:  # left boundary
+                    self._position['x'] += 1
+
+                    if self._position['floor'] == 1:
+                        if self._position['x'] > 16 * 7 and not (self._position['x'] - 8) % 16:
+                            self._position['y'] -= 1
+
+                self._x_advance -= 1
+
+            else:
+                if not self._position['x'] <= 16:  # right boundary
+                    self._position['x'] -= 1
+
+                    if self._position['floor'] == 1:
+                        if self._position['x'] > 16 * 7 and not (self._position['x'] - 8) % 16:
+                            self._position['y'] += 1
+                self._x_advance += 1
+
+
+    def _stand(self):
+        self._x_speed = 0
+        self._set_sprite('stand_left' if self._animation_direction == 'left' else 'stand_right')
+        self._state = 'stand'
+
+    def _go_left(self):
+        self._animation_direction = 'left'
+        if self._position['x'] <= 16:  # left boundary
+            self.next_state('stand')
+        else:
+            self._set_sprite('walk_left')
+            self._x_speed = -self._walk_speed
+            self._state = 'go_left'
+
+    def _go_right(self):
+        self._animation_direction = 'right'
+        if self._position['x'] >= 256 - 16:  # right boundary
+            self.next_state('stand')
+        else:
+            self._set_sprite('walk_right')
+            self._x_speed = self._walk_speed
+            self._state = 'go_right'
+
+    def _get_sprite(self, num, wh):
+        block_wh = 40
+        return self._sprites.image_at(Rect(block_wh * (num % 8), block_wh * (num // 8), wh, wh), 0)
+
+    def _set_sprite(self, sprite_name):
         self._animation_state = sprite_name
         self._animation_frame = 0
         self._animation_advance = 0
