@@ -1,5 +1,8 @@
 import pygame
 import os
+from objects.level import Level
+from objects.mario import Mario
+from objects.kong import Kong
 
 
 class GameLoop:
@@ -7,8 +10,15 @@ class GameLoop:
         os.environ['SDL_VIDEO_CENTERED'] = '1'
         pygame.init()
 
-        self._screen = pygame.display.set_mode((512, 480))
+        self._screen = pygame.display.set_mode((512, 480), pygame.RESIZABLE)
         self._clock = pygame.time.Clock()
+        self._mario = Mario()
+        self._level = Level()
+        self._kong = Kong()
+        self._surface = pygame.surface.Surface((256, 240))
+
+    def _key_handler(self, event: pygame.event.Event):
+        pass
 
     def run(self):
         try:
@@ -19,6 +29,19 @@ class GameLoop:
                 event = pygame.event.wait()
                 if event.type == pygame.QUIT:
                     break
+
+                if event.type in [pygame.KEYUP, pygame.KEYDOWN]:
+                    self._key_handler(event)
+
+                if event.type == pygame.VIDEORESIZE:
+                    # There's some code to add back window content here.
+                    factor = max(min(round(event.w / 256 * 2) / 2., round(event.h / 240 * 2) / 2.), 1)
+                    print(f'resized screen to {factor} factor')
+                    self._screen = pygame.display.set_mode((round(256 * factor), round(240 * factor)), pygame.RESIZABLE)
+
+                self._surface.blit(self._mario.get_standing(), (0, 0))
+                self._screen.blit(pygame.transform.scale(self._surface, self._screen.get_rect().size), (0, 0))
+                pygame.display.flip()
                 self._clock.tick(60)
 
         finally:
