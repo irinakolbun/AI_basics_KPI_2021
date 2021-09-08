@@ -13,7 +13,7 @@ class GameLoop:
         self._screen = pygame.display.set_mode((512, 480), pygame.RESIZABLE)
         self._clock = pygame.time.Clock()
         self._mario = Mario()
-        self._level = Level()
+        self._level = Level(0)
         self._kong = Kong()
         self._surface = pygame.surface.Surface((256, 240))
 
@@ -24,6 +24,8 @@ class GameLoop:
         try:
             pygame.display.flip()
             pygame.display.set_caption("Donkey Kong")
+
+            level = self._level.get_level()
 
             while True:
                 event = pygame.event.wait(10)
@@ -38,6 +40,9 @@ class GameLoop:
                     factor = max(min(round(event.w / 256 * 2) / 2., round(event.h / 240 * 2) / 2.), 1)
                     print(f'resized screen to {factor} factor')
                     self._screen = pygame.display.set_mode((round(256 * factor), round(240 * factor)), pygame.RESIZABLE)
+
+                # draw level
+                self._surface.blit(level, (0, 0))
 
                 # update Mario's sprite
                 self._surface.blit(self._mario.get_cur_sprite(self._clock.get_time()), self._mario.get_position())

@@ -13,11 +13,29 @@ class Mario:
         self._animation_advance = 0
         self._animation_frame = 0
 
-        self._position = {'x': 0, 'y': 240-16}
+        self._position = {'x': 16, 'y': 240-16-8}
 
     def _get_sprite(self, num, wh):
         block_wh = 40
-        return self._sprites.image_at(Rect(block_wh * (num % 8), block_wh * (num // 8), wh, wh))
+        return self._sprites.image_at(Rect(block_wh * (num % 8), block_wh * (num // 8), wh, wh), 0)
+
+    def get_cur_sprite(self, advance):
+        advance /= 1000
+
+        if self._animations[self._animation_state][self._animation_frame]['duration'] <= self._animation_advance + advance:
+            self._animation_advance = max(advance - self._animation_advance, 0)
+            self._animation_frame = (self._animation_frame + 1) % len(self._animations[self._animation_state])
+        else:
+            self._animation_advance += advance
+        return self._animations[self._animation_state][self._animation_frame]['sprite']
+
+    def set_sprite(self, sprite_name):
+        self._animation_state = sprite_name
+        self._animation_frame = 0
+        self._animation_advance = 0
+
+    def get_position(self):
+        return self._position['x'], self._position['y']
 
     def _init_sprites(self):
         return {
@@ -41,21 +59,3 @@ class Mario:
                 {'sprite': self._get_sprite(4, 16), 'duration': 0.01},
             ],
         }
-
-    def get_cur_sprite(self, advance):
-        advance /= 1000
-
-        if self._animations[self._animation_state][self._animation_frame]['duration'] <= self._animation_advance + advance:
-            self._animation_advance = max(advance - self._animation_advance, 0)
-            self._animation_frame = (self._animation_frame + 1) % len(self._animations[self._animation_state])
-        else:
-            self._animation_advance += advance
-        return self._animations[self._animation_state][self._animation_frame]['sprite']
-
-    def set_sprite(self, sprite_name):
-        self._animation_state = sprite_name
-        self._animation_frame = 0
-        self._animation_advance = 0
-
-    def get_position(self):
-        return self._position['x'], self._position['y']
