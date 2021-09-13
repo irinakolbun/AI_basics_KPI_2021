@@ -13,7 +13,7 @@ class GameLoop:
         self._screen = pygame.display.set_mode((512, 480), pygame.RESIZABLE)
         self._clock = pygame.time.Clock()
         self._mario = Mario()
-        self._level = Level(0)
+        self._level = Level(4)
         self._kong = Kong()
         self._surface = pygame.surface.Surface((256, 240))
 

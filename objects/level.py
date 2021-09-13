@@ -26,7 +26,7 @@ class Level:
             surface.blit(self._bridge_sprite, (i * 8, 240 - 8 - j))
 
         # even floors
-        for floor in range(1, 3):
+        for floor in range(1, (level + 2) // 2):
             j = 1
             for i in range(4, 30):
                 if not i % 2:
@@ -34,13 +34,12 @@ class Level:
                 surface.blit(self._bridge_sprite, (i*8, 240-8-j-(floor * 64)))
 
         # odd floors
-        for floor in range(3):
+        for floor in range((level + 1) // 2):
             j = 0
             for i in range(27, 1, -1):
                 if i % 2:
                     j += 1
                 surface.blit(self._bridge_sprite, (i*8, 240-8-32-j-(floor * 64)))
-
 
         return surface
 
