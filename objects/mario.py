@@ -33,6 +33,8 @@ class Mario:
             ('go_left', 'jump'): self._jump,
             ('go_right', 'jump'): self._jump,
             ('jump', 'stand'): self._set_stand,
+            ('jump', 'go_left'): self._set_go_left,
+            ('jump', 'go_right'): self._set_go_right,
             ('go_left', 'go_right'): self._go_right,
             ('go_right', 'go_left'): self._go_left,
             ('go_left', 'stand'): self._stand,
@@ -101,6 +103,12 @@ class Mario:
 
     def _set_stand(self):
         self._last_state = 'stand'
+
+    def _set_go_left(self):
+        self._last_state = 'go_left'
+
+    def _set_go_right(self):
+        self._last_state = 'go_right'
 
     def _stand(self):
         self._x_speed = 0
