@@ -160,6 +160,7 @@ class Mario:
         if self._state == 'on_ladder':
             self._y_speed = -self._climb_speed
             self._state = 'down'
+            self._set_sprite('climbing')
         else:
             for ladder in self._level.get_ladders():
                 if ladder['y_end'] == self._position['y'] and ladder['x'] - 7 <= self._position['x'] <= ladder['x']:
