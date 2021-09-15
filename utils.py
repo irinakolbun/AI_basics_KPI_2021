@@ -37,11 +37,11 @@ class SpriteSheet:
 def test_floor(coords):
     if coords['x'] < 120 and coords['y'] == 240 - 16 - 8:
         return True
-    elif coords['x'] >= 120 and coords['y'] == 240 - 16 - 8 - 1 - ((coords['x'] - 120) // 16):
+    elif coords['x'] >= 120 and coords['y'] == 240 - 16 - 8 - 2 - ((coords['x'] - 120) // 16):
         return True
     else:
         for level in range(1, 3):
-            if coords['x'] <= 256-25-15 and coords['y'] == 201 - 16 - 64 * (level - 1) - ((240 - coords['x'] + 7) // 16):
+            if coords['x'] <= 256-25-16 and coords['y'] == 201 - 16 - 64 * (level - 1) - ((240 - coords['x'] + 7) // 16):
                 return True
             if coords['x'] >= 24 and coords['y'] == 167 - 16 - 64 * (level - 1) - ((coords['x'] - 8) // 16):
                 return True

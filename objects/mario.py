@@ -14,7 +14,8 @@ class Mario:
         self._animation_frame = 0
         self._animation_direction = 'right'
 
-        self._position = {'x': 16, 'y': 240-16-8, 'floor': 1}
+        # self._position = {'x': 16, 'y': 240-16-8, 'floor': 1}
+        self._position = {'x': 16, 'y': 16, 'floor': 1}
         self._state = 'stand'
         self._last_state = self._state
         self._walk_speed = 1

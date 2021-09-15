@@ -6,6 +6,7 @@ from objects.kong import Kong
 
 from utils import test_floor
 
+
 class GameLoop:
     def __init__(self):
         os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -17,6 +18,7 @@ class GameLoop:
         self._level = Level(4)
         self._kong = Kong()
         self._surface = pygame.surface.Surface((256, 240))
+        self._debug_lines = False
 
     def _key_handler(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
@@ -26,6 +28,11 @@ class GameLoop:
                 self._mario.next_state('go_left')
             if event.key == pygame.K_UP:
                 self._mario.next_state('jump')
+            if event.key == pygame.K_d:
+                self._debug_lines = not self._debug_lines
+            if event.key == pygame.K_SPACE:
+                self.__init__()
+                self.run()
 
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_RIGHT:
@@ -61,13 +68,21 @@ class GameLoop:
                 self._mario.move()
                 self._surface.blit(self._mario.get_cur_sprite(self._clock.get_time()), self._mario.get_position())
 
-                # # debug lines
-                # for x in range(256):
-                #     for y in range(240):
-                #         if test_floor({'x': x, 'y': y}):
-                #             pygame.draw.line(self._surface, 'orange', (x, y), (x, y))
-                #
-                # pygame.draw.line(self._surface, 'red', self._mario.get_position(), self._mario.get_position())
+                # debug lines
+                if self._debug_lines:
+                    for x in range(8, 240-8):
+                        for y in range(240):
+                            if test_floor({'x': x, 'y': y}):
+                                pygame.draw.line(self._surface, 'orange', (x+8, y+16), (x+8, y+16))
+                    mario_pos = list(self._mario.get_position())
+                    mario_pos[0] += 8
+                    mario_pos[1] += 16
+                    pygame.draw.line(self._surface, 'red', mario_pos, mario_pos)
+                    ladders = self._level.get_ladders()
+                    for ladder in ladders:
+                        pygame.draw.line(self._surface, 'green', (ladder['x'], ladder['y_start']+16), (ladder['x'], ladder['y_end']+16))
+                        pygame.draw.line(self._surface, 'green', (ladder['x']+7, ladder['y_start']+16), (ladder['x']+7, ladder['y_end']+16))
+
 
                 # copy buffer contents to screen
                 self._screen.blit(pygame.transform.scale(self._surface, self._screen.get_rect().size), (0, 0))
