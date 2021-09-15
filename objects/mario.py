@@ -1,4 +1,4 @@
-from utils import SpriteSheet
+from utils import SpriteSheet, test_floor
 from pygame.rect import Rect
 
 
@@ -63,11 +63,6 @@ class Mario:
             if self._x_advance >= 0:
                 if not self._position['x'] >= 240 - 16:  # left boundary
                     self._position['x'] += 1
-
-                    if self._position['floor'] == 1:
-                        if self._position['x'] > 16 * 7 and not (self._position['x'] - 8) % 16:
-                            self._position['y'] -= 1
-
                 self._x_advance -= 1
 
             else:
@@ -77,7 +72,14 @@ class Mario:
 
         # y movement
         self._y_advance += self._y_velocity
-        if (not self._test_floor()) or (self._y_velocity > 0):
+        if (not test_floor(self._position)) or (self._y_velocity > 0):
+            if not test_floor(self._position):
+                    pos = self._position.copy()
+                    pos['y'] -= 1
+                    if test_floor(pos):
+                        self._position['y'] -= 1
+                        return
+
             self._y_velocity -= self._y_gravity
             if abs(self._y_advance) >= 1:
                 if self._y_advance >= 0:
@@ -87,19 +89,11 @@ class Mario:
                     self._y_velocity -= self._y_gravity
                     self._position['y'] += 1
                     self._y_advance += 1
-                    if self._test_floor():
+                    if test_floor(self._position):
                         self._state = 'stand'
                         self._y_velocity = 0
                         self._y_advance = 0
                         self.next_state(self._last_state)
-
-    def _test_floor(self):
-        if self._position['floor'] == 1:
-            if self._position['x'] < 120 and self._position['y'] == 240 - 16 - 8:
-                return True
-            elif self._position['x'] >= 120 and self._position['y'] == 240 - 16 - 8 - 1 - ((self._position['x'] - 120) // 16):
-                return True
-        return False
 
     def _set_stand(self):
         self._last_state = 'stand'

@@ -4,6 +4,7 @@ from objects.level import Level
 from objects.mario import Mario
 from objects.kong import Kong
 
+from utils import test_floor
 
 class GameLoop:
     def __init__(self):
@@ -60,6 +61,15 @@ class GameLoop:
                 self._mario.move()
                 self._surface.blit(self._mario.get_cur_sprite(self._clock.get_time()), self._mario.get_position())
 
+                # # debug lines
+                # for x in range(256):
+                #     for y in range(240):
+                #         if test_floor({'x': x, 'y': y}):
+                #             pygame.draw.line(self._surface, 'orange', (x, y), (x, y))
+                #
+                # pygame.draw.line(self._surface, 'red', self._mario.get_position(), self._mario.get_position())
+
+                # copy buffer contents to screen
                 self._screen.blit(pygame.transform.scale(self._surface, self._screen.get_rect().size), (0, 0))
                 pygame.display.flip()
                 self._clock.tick(60)
