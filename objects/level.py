@@ -29,13 +29,16 @@ class Level:
                     if skips:
                         if test_floor({'x': x, 'y': y}):
                             skips -= 1
-                    else:
+                    if not skips:
                         ladder_start = y
                         while not (any(test_floor({'x': x, 'y': y}) for y in range(y - 4, y)) or y <= 0):
                             y -= 4
                             surface.blit(self._ladder_sprite, (x, y + 17))
 
-                        ladder_end = next(y for y in ((y if test_floor({'x': x, 'y': y}) else None) for y in range(y - 4, y)) if y is not None)
+                        try:
+                            ladder_end = next(y for y in ((y if test_floor({'x': x, 'y': y}) else None) for y in range(y - 4, y)) if y is not None)
+                        except StopIteration:
+                            return self._generate(level)
                         self._ladders.append({'x': x, 'y_start': ladder_start, 'y_end': ladder_end})
                         break
 

@@ -14,8 +14,8 @@ class GameLoop:
 
         self._screen = pygame.display.set_mode((512, 480), pygame.RESIZABLE)
         self._clock = pygame.time.Clock()
-        self._mario = Mario()
         self._level = Level(4)
+        self._mario = Mario(self._level)
         self._kong = Kong()
         self._surface = pygame.surface.Surface((256, 240))
         self._debug_lines = False
@@ -28,6 +28,8 @@ class GameLoop:
                 self._mario.next_state('go_left')
             if event.key == pygame.K_UP:
                 self._mario.next_state('jump')
+            if event.key == pygame.K_DOWN:
+                self._mario.next_state('down')
             if event.key == pygame.K_d:
                 self._debug_lines = not self._debug_lines
             if event.key == pygame.K_SPACE:
@@ -39,6 +41,11 @@ class GameLoop:
                 self._mario.next_state('stand')
             if event.key == pygame.K_LEFT:
                 self._mario.next_state('stand')
+            if event.key == pygame.K_DOWN:
+                self._mario.next_state('on_ladder')
+            if event.key == pygame.K_UP:
+                if self._mario.get_moving_state() == 'on_ladder':
+                    self._mario.next_state('on_ladder')
 
     def run(self):
         try:
