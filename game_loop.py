@@ -16,7 +16,7 @@ class GameLoop:
         self._clock = pygame.time.Clock()
         self._level = Level(4)
         self._mario = Mario(self._level)
-        self._kong = Kong()
+        self._kong = Kong(4)
         self._surface = pygame.surface.Surface((256, 240))
         self._debug_lines = False
 
@@ -75,6 +75,10 @@ class GameLoop:
                 # update Mario's sprite
                 self._mario.move()
                 self._surface.blit(self._mario.get_cur_sprite(self._clock.get_time()), self._mario.get_position())
+
+                # update Kong's sprite
+                self._kong.move(self._clock.get_time())
+                self._surface.blit(self._kong.get_cur_sprite(self._clock.get_time()), self._kong.get_position())
 
                 # debug lines
                 if self._debug_lines:

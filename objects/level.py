@@ -1,13 +1,14 @@
 import random
 
 import pygame
-from utils import test_floor
+from utils import test_floor, SpriteSheet
 
 
 class Level:
     def __init__(self, level: int):
         self._bridge_sprite = pygame.image.load('sprites/bridge.png').convert_alpha()
         self._ladder_sprite = pygame.image.load('sprites/ladder.png').convert_alpha()
+        self._barrel_sprite = SpriteSheet('sprites/enemies.png').image_at(pygame.Rect(0, 24, 24, 24), 0).convert_alpha()
         self._ladders = []
         self._level = self._generate(level)
 
@@ -41,6 +42,14 @@ class Level:
                             return self._generate(level)
                         self._ladders.append({'x': x, 'y_start': ladder_start, 'y_end': ladder_end})
                         break
+
+        # Kong supports
+        for i in range(9):
+            surface.blit(self._bridge_sprite, (i * 8 + 139, 24+40))
+
+        for i in range(2):
+            for j in range(2):
+                surface.blit(pygame.transform.rotate(self._barrel_sprite, 90), (i*11 + 137, 30+j*15))
 
         # first floor
         for i in range(2, 16):

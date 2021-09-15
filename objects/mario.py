@@ -60,6 +60,7 @@ class Mario:
         }
 
     def next_state(self, state):
+        print(self._state, state)
         self._state_transitions.get((self._state, state),
                                     lambda: print(f'No state transition "{self._state} => {state}"'))()
 
@@ -134,7 +135,9 @@ class Mario:
                     self._stand()
 
     def _set_stand(self):
-        self._last_state = 'stand'
+        print('set_stand', self._move_state)
+        if self._move_state == 'run':
+            self._last_state = 'stand'
 
     def _set_go_left(self):
         self._last_state = 'go_left'
