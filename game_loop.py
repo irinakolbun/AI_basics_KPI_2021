@@ -42,7 +42,8 @@ class GameLoop:
             if event.key == pygame.K_LEFT:
                 self._mario.next_state('stand')
             if event.key == pygame.K_DOWN:
-                self._mario.next_state('on_ladder')
+                if self._mario.get_moving_state() == 'on_ladder':
+                    self._mario.next_state('on_ladder')
             if event.key == pygame.K_UP:
                 if self._mario.get_moving_state() == 'on_ladder':
                     self._mario.next_state('on_ladder')
