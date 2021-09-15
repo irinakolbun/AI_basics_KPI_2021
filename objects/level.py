@@ -50,7 +50,7 @@ class Level:
         for i in range(16, 30):
             if not i % 2:
                 j += 1
-            surface.blit(self._bridge_sprite, (i * 8, 240 - 8 - j))
+            surface.blit(self._bridge_sprite, (i * 8, 240 - 7 - j))
 
         # even floors
         for floor in range(1, (level + 2) // 2):
