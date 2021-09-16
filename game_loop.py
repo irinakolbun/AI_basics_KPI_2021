@@ -13,8 +13,14 @@ class GameLoop:
     def __init__(self):
         os.environ['SDL_VIDEO_CENTERED'] = '1'
         pygame.init()
+        pygame.font.init()
+        font = pygame.font.SysFont('Comic Sans MS', 30)
+        self._gameover_text = font.render('Game Over!', False, (0xFF, 0xA5, 0x00))
+        self._win_text = font.render('Win!', False, (0xFF, 0xA5, 0x00))
+        font = pygame.font.SysFont('Comic Sans MS', 24)
+        self._space_text = font.render('Press Space to restart', False, (0xFF, 0xA5, 0x00))
 
-        self._levels = random.choice([4])
+        self._levels = random.choice([2, 3, 4])
         self._screen = pygame.display.set_mode((512, 480), pygame.RESIZABLE)
         self._clock = pygame.time.Clock()
         self._level = Level(self._levels)
@@ -22,17 +28,19 @@ class GameLoop:
         self._kong = Kong(self._level)
         self._surface = pygame.surface.Surface((256, 240))
         self._debug_lines = False
+        self._running = True
 
     def _key_handler(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RIGHT:
-                self._mario.next_state('go_right')
-            if event.key == pygame.K_LEFT:
-                self._mario.next_state('go_left')
-            if event.key == pygame.K_UP:
-                self._mario.next_state('jump')
-            if event.key == pygame.K_DOWN:
-                self._mario.next_state('down')
+            if self._running:
+                if event.key == pygame.K_RIGHT:
+                    self._mario.next_state('go_right')
+                if event.key == pygame.K_LEFT:
+                    self._mario.next_state('go_left')
+                if event.key == pygame.K_UP:
+                    self._mario.next_state('jump')
+                if event.key == pygame.K_DOWN:
+                    self._mario.next_state('down')
             if event.key == pygame.K_d:
                 self._debug_lines = not self._debug_lines
             if event.key == pygame.K_SPACE:
@@ -40,16 +48,17 @@ class GameLoop:
                 self.run()
 
         elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_RIGHT:
-                self._mario.next_state('stand')
-            if event.key == pygame.K_LEFT:
-                self._mario.next_state('stand')
-            if event.key == pygame.K_DOWN:
-                if self._mario.get_moving_state() == 'on_ladder':
-                    self._mario.next_state('on_ladder')
-            if event.key == pygame.K_UP:
-                if self._mario.get_moving_state() == 'on_ladder':
-                    self._mario.next_state('on_ladder')
+            if self._running:
+                if event.key == pygame.K_RIGHT:
+                    self._mario.next_state('stand')
+                if event.key == pygame.K_LEFT:
+                    self._mario.next_state('stand')
+                if event.key == pygame.K_DOWN:
+                    if self._mario.get_moving_state() == 'on_ladder':
+                        self._mario.next_state('on_ladder')
+                if event.key == pygame.K_UP:
+                    if self._mario.get_moving_state() == 'on_ladder':
+                        self._mario.next_state('on_ladder')
 
     def run(self):
         try:
@@ -75,21 +84,43 @@ class GameLoop:
                 # draw level
                 self._surface.blit(level, (0, 0))
 
-                # update Mario's sprite
-                self._mario.move()
-                self._surface.blit(self._mario.get_cur_sprite(self._clock.get_time()), self._mario.get_position())
-
                 # update Kong's sprite
-                self._kong.move(self._clock.get_time())
+                if self._running:
+                    self._kong.move(self._clock.get_time())
                 self._surface.blit(self._kong.get_cur_sprite(self._clock.get_time()), self._kong.get_position())
 
                 # update barrels
                 for barrel in self._kong.get_barrels():
-                    barrel.move()
-                    self._surface.blit(barrel.get_cur_sprite(self._clock.get_time()), barrel.get_position())
+                    if self._running:
+                        barrel.move()
+                    barrel_pos = barrel.get_position()
+                    self._surface.blit(barrel.get_cur_sprite(self._clock.get_time()), barrel_pos)
+
+                    if self._running:
+                        if barrel_pos[0] <= mario_pos[0] + 8 <= barrel_pos[0] + 11 \
+                            and barrel_pos[1] <= mario_pos[1] + 10 <= barrel_pos[1] + 11:
+                            self._running = False
+                            level.blit(self._gameover_text, (40, 10))
+                            level.blit(self._space_text, (0, 60))
+                            self._mario.fail()
 
                     if self._debug_lines:
-                        pygame.draw.line(self._surface, 'white', barrel.get_position(), barrel.get_position())
+                        pygame.draw.line(self._surface, 'white', barrel_pos, (barrel_pos[0] + 11, barrel_pos[1]))
+                        pygame.draw.line(self._surface, 'white', barrel_pos, (barrel_pos[0], barrel_pos[1] + 11))
+                        pygame.draw.line(self._surface, 'white', (barrel_pos[0] + 11, barrel_pos[1]), (barrel_pos[0] + 11, barrel_pos[1] + 11))
+                        pygame.draw.line(self._surface, 'white', (barrel_pos[0], barrel_pos[1] + 11), (barrel_pos[0] + 11, barrel_pos[1] + 11))
+
+                # update Mario's sprite
+                if self._running:
+                    self._mario.move()
+                mario_pos = self._mario.get_position()
+                self._surface.blit(self._mario.get_cur_sprite(self._clock.get_time()), mario_pos)
+
+                if (mario_pos, self._levels) in [((224, 74), 4), ((16, 107), 3), ((224, 138), 2),
+                                                 ((16, 171), 1)]:
+                    self._running = False
+                    level.blit(self._win_text, (80, 10))
+                    level.blit(self._space_text, (0, 60))
 
                 # debug lines
                 if self._debug_lines:
@@ -99,8 +130,8 @@ class GameLoop:
                                 pygame.draw.line(self._surface, 'orange', (x+8, y+16), (x+8, y+16))
                     mario_pos = list(self._mario.get_position())
                     mario_pos[0] += 8
-                    mario_pos[1] += 16
-                    pygame.draw.line(self._surface, 'red', mario_pos, mario_pos)
+                    mario_pos[1] += 10
+                    pygame.draw.line(self._surface, 'green', mario_pos, mario_pos)
                     ladders = self._level.get_ladders()
                     for ladder in ladders:
                         pygame.draw.line(self._surface, 'green', (ladder['x'], ladder['y_start']+16), (ladder['x'], ladder['y_end']+16))

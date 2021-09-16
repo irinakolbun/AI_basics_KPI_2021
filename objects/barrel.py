@@ -85,7 +85,7 @@ class Barrel:
 
         # y movement
         self._y_advance += self._y_velocity
-        if (not test_floor(self._position)) or (self._y_velocity > 0):
+        if (not (test_floor(self._position) and self._position['y'] >= [171, 138, 107, 74][self._level._level_num - 1])) or (self._y_velocity > 0):
             self._y_velocity -= self._y_gravity
             if abs(self._y_advance) >= 1:
                 if self._y_advance >= 0:
@@ -95,7 +95,7 @@ class Barrel:
                     self._y_velocity -= self._y_gravity
                     self._position['y'] += 1
                     self._y_advance += 1
-                    if test_floor(self._position):
+                    if test_floor(self._position) and self._position['y'] >= [171, 138, 107, 74][self._level._level_num - 1]:
                         self._state = 'stand'
                         self._direction = self._test_direction()
                         self._y_velocity = 0

@@ -227,6 +227,9 @@ class Mario:
     def get_position(self):
         return self._position['x'], self._position['y']
 
+    def fail(self):
+        self._set_sprite('fail')
+
     def _init_sprites(self):
         return {
             'walk_left': [
@@ -260,5 +263,16 @@ class Mario:
             'climbing': [
                 {'sprite': self._get_sprite(11, 16), 'duration': 0.5},
                 {'sprite': self._get_sprite(12, 16), 'duration': 0.5},
+            ],
+            'fail': [
+                {'sprite': self._get_sprite(26, 16), 'duration': 0.5},
+                {'sprite': self._get_sprite(27, 16), 'duration': 0.1},
+                {'sprite': self._get_sprite(28, 16), 'duration': 0.1},
+                {'sprite': self._get_sprite(29, 16), 'duration': 0.1},
+                {'sprite': self._get_sprite(26, 16), 'duration': 0.1},
+                {'sprite': self._get_sprite(27, 16), 'duration': 0.1},
+                {'sprite': self._get_sprite(28, 16), 'duration': 0.1},
+                {'sprite': self._get_sprite(29, 16), 'duration': 0.1},
+                {'sprite': self._get_sprite(7, 16), 'duration': 1000},
             ],
         }
