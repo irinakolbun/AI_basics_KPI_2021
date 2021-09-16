@@ -1,8 +1,8 @@
 import pygame
-
-from utils import SpriteSheet, test_floor
+from utils import SpriteSheet
 from pygame.rect import Rect
 from objects.level import Level
+from objects.barrel import Barrel
 
 
 class Kong:
@@ -22,13 +22,18 @@ class Kong:
         self._animation_state = 'stand'
         self._animation_advance = 0
         self._animation_frame = 0
-        self._position = {'x': 256-64-32, 'y': 24}
+        self._position = {'x': 256-64-32, 'y': 24} if not level._level_num % 2 else {'x': 48, 'y': 24}
         self._state = 'stand'
 
         self._barrel_rate = 15
         self._time_advance = 0
         self._barrel_throw_time = 1.5
+        self._barrel_throw_at = 1
+        self._max_barrels = 4
         self._is_throwing_barrel = False
+        self._barrel_thrown = True
+
+        self._barrels = []
 
         self._state_transitions = {
         }
@@ -38,19 +43,27 @@ class Kong:
                                     lambda: print(f'No state transition "{self._state} => {state}"'))()
 
     def move(self, advance):
+        self._barrels = list(filter(lambda x: x.get_position()[1] < 240, self._barrels))
         advance /= 1000
+
         self._time_advance += advance
-        if self._time_advance >= 60 / self._barrel_rate:
-            self._throw_barrel()
+
+        if self._time_advance >= 60 / self._barrel_rate and self._max_barrels > len(self._barrels):
+            self._set_sprite('throwing')
+            self._is_throwing_barrel = True
+            self._barrel_thrown = False
             self._time_advance = 0
+
+        if not self._barrel_thrown and self._time_advance >= self._barrel_throw_at and self._max_barrels > len(self._barrels):
+            self._throw_barrel()
+            self._barrel_thrown = True
 
         if self._is_throwing_barrel and self._time_advance >= self._barrel_throw_time:
             self._set_sprite('stand')
             self._is_throwing_barrel = False
 
     def _throw_barrel(self):
-        self._set_sprite('throwing')
-        self._is_throwing_barrel = True
+        self._barrels.append(Barrel(self._level))
 
     def get_cur_sprite(self, advance):
         advance /= 1000
@@ -81,8 +94,11 @@ class Kong:
                 {'sprite': self._get_sprite(8, 48), 'duration': 0.2},
             ],
             'throwing': [
-                {'sprite': self._get_sprite(6, 48), 'duration': 0.5},
+                {'sprite': self._get_sprite(6, 48) if not self._level._level_num % 2 else self._throwing_2, 'duration': 0.5},
                 {'sprite': self._throwing_1, 'duration': 0.5},
-                {'sprite': self._throwing_2, 'duration': 0.5},
+                {'sprite': self._throwing_2 if not self._level._level_num % 2 else self._get_sprite(6, 48), 'duration': 0.5},
             ]
         }
+
+    def get_barrels(self):
+        return self._barrels

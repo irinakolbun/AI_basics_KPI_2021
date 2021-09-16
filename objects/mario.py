@@ -60,7 +60,6 @@ class Mario:
         }
 
     def next_state(self, state):
-        print(self._state, state)
         self._state_transitions.get((self._state, state),
                                     lambda: print(f'No state transition "{self._state} => {state}"'))()
 

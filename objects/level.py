@@ -10,6 +10,7 @@ class Level:
         self._ladder_sprite = pygame.image.load('sprites/ladder.png').convert_alpha()
         self._barrel_sprite = SpriteSheet('sprites/enemies.png').image_at(pygame.Rect(0, 24, 24, 24), 0).convert_alpha()
         self._ladders = []
+        self._level_num = level
         self._level = self._generate(level)
 
     def _generate(self, level):
@@ -45,11 +46,11 @@ class Level:
 
         # Kong supports
         for i in range(9):
-            surface.blit(self._bridge_sprite, (i * 8 + 139, 24+40))
+            surface.blit(self._bridge_sprite, (i * 8 + 139, 24+40) if not self._level_num % 2 else (256 - (i * 8 + 139), 24+40))
 
         for i in range(2):
             for j in range(2):
-                surface.blit(pygame.transform.rotate(self._barrel_sprite, 90), (i*11 + 137, 30+j*15))
+                surface.blit(pygame.transform.rotate(self._barrel_sprite, 90), (i*11 + 137, 30+j*15) if not self._level_num % 2 else ((i*11 + 96), 30+j*15))
 
         # first floor
         for i in range(2, 16):

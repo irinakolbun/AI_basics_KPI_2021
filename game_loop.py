@@ -1,3 +1,5 @@
+import random
+
 import pygame
 import os
 from objects.level import Level
@@ -12,11 +14,12 @@ class GameLoop:
         os.environ['SDL_VIDEO_CENTERED'] = '1'
         pygame.init()
 
+        self._levels = random.choice([4])
         self._screen = pygame.display.set_mode((512, 480), pygame.RESIZABLE)
         self._clock = pygame.time.Clock()
-        self._level = Level(4)
+        self._level = Level(self._levels)
         self._mario = Mario(self._level)
-        self._kong = Kong(4)
+        self._kong = Kong(self._level)
         self._surface = pygame.surface.Surface((256, 240))
         self._debug_lines = False
 
@@ -80,6 +83,14 @@ class GameLoop:
                 self._kong.move(self._clock.get_time())
                 self._surface.blit(self._kong.get_cur_sprite(self._clock.get_time()), self._kong.get_position())
 
+                # update barrels
+                for barrel in self._kong.get_barrels():
+                    barrel.move()
+                    self._surface.blit(barrel.get_cur_sprite(self._clock.get_time()), barrel.get_position())
+
+                    if self._debug_lines:
+                        pygame.draw.line(self._surface, 'white', barrel.get_position(), barrel.get_position())
+
                 # debug lines
                 if self._debug_lines:
                     for x in range(8, 240-8):
@@ -94,7 +105,6 @@ class GameLoop:
                     for ladder in ladders:
                         pygame.draw.line(self._surface, 'green', (ladder['x'], ladder['y_start']+16), (ladder['x'], ladder['y_end']+16))
                         pygame.draw.line(self._surface, 'green', (ladder['x']+7, ladder['y_start']+16), (ladder['x']+7, ladder['y_end']+16))
-
 
                 # copy buffer contents to screen
                 self._screen.blit(pygame.transform.scale(self._surface, self._screen.get_rect().size), (0, 0))
