@@ -1,4 +1,5 @@
 import random
+from collections import defaultdict
 
 import pygame
 from utils import test_floor, SpriteSheet
@@ -10,6 +11,8 @@ class Level:
         self._ladder_sprite = pygame.image.load('sprites/ladder.png').convert_alpha()
         self._barrel_sprite = SpriteSheet('sprites/enemies.png').image_at(pygame.Rect(0, 24, 24, 24), 0).convert_alpha()
         self._ladders = []
+        self._adj_list = defaultdict(list)
+        self._weights = defaultdict(lambda: float('+inf'))
         self._level_num = level
         self._level = self._generate(level)
 
@@ -41,8 +44,25 @@ class Level:
                             ladder_end = next(y for y in ((y if test_floor({'x': x, 'y': y}) else None) for y in range(y - 4, y)) if y is not None)
                         except StopIteration:
                             return self._generate(level)
-                        self._ladders.append({'x': x, 'y_start': ladder_start, 'y_end': ladder_end})
+                        self._ladders.append({'x': x, 'y_start': ladder_start, 'y_end': ladder_end, 'level': floor, 'block': (x - 4) // 16 - 2, 'distance': ladder_start - ladder_end})
                         break
+
+        for i in range(self._level_num * 12):
+            if i % 12 == 0:
+                self._adj_list[i] = [i+1]
+                self._weights[(i, i+1)] = 16
+            elif i % 12 == 11:
+                self._adj_list[i] = [i-1]
+                self._weights[(i, i-1)] = 16
+            else:
+                self._adj_list[i] = [i-1, i+1]
+                self._weights[(i, i+1)] = 16
+                self._weights[(i, i-1)] = 16
+
+        for ladder in self._ladders:
+            self._adj_list[ladder['level'] * 12 + ladder['block']].append((ladder['level'] + 1) * 12 + ladder['block'])
+            self._weights[(ladder['level'] * 12 + ladder['block'], (ladder['level'] + 1) * 12 + ladder['block'])] = ladder['distance']
+            self._weights[((ladder['level'] + 1) * 12 + ladder['block']), ladder['level'] * 12 + ladder['block']] = ladder['distance']
 
         # Kong supports
         for i in range(9):

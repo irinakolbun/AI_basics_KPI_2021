@@ -67,6 +67,13 @@ class GameLoop:
 
             level = self._level.get_level()
 
+            level_map = [['#' for y in range(12)] for x in range(self._levels)]
+            for ladder in self._level.get_ladders():
+                level_map[self._levels - ladder['level'] - 1][ladder['block']] = '|'
+            print('\n'.join(str(x) for x in level_map), self._level.get_ladders(), '\n')
+            print(self._level._adj_list)
+            print(self._level._weights)
+
             while True:
                 event = pygame.event.wait(10)
                 if event.type == pygame.QUIT:
