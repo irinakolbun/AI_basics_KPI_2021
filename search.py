@@ -15,7 +15,7 @@ def bfs(graph, start, end, weights):
 
         # Check if node is final
         if current_node == end:
-            return "BFS: Path found", backtrace(parent, start, end), get_path_weight(backtrace(parent, start, end), weights)
+            return "BFS", backtrace(parent, start, end), get_path_weight(backtrace(parent, start, end), weights)
 
         for node in graph[current_node]:
             if node not in explored:
@@ -36,7 +36,7 @@ def dfs(graph, start, end, weights):
 
         # Check if node is goal-node
         if current_node == end:
-            return "DFS: Path found", backtrace(parent, start, end), get_path_weight(backtrace(parent, start, end), weights)
+            return "DFS", backtrace(parent, start, end), get_path_weight(backtrace(parent, start, end), weights)
 
         # expanding nodes
         for node in reversed(graph[current_node]):
@@ -63,7 +63,7 @@ def ucs(graph, start, end, weights=None):
         explored.append(current_node)
 
         if current_node == end:
-            return "UCS: Path found", backtrace(parent, start, end), get_path_weight(backtrace(parent, start, end), weights)
+            return "UCS", backtrace(parent, start, end), get_path_weight(backtrace(parent, start, end), weights)
 
         for node in graph[current_node]:
             if node not in explored:
@@ -74,13 +74,6 @@ def ucs(graph, start, end, weights=None):
                 ))
 
 
-def get_path_weight(l: list, weights):
-    res = 0
-    for i in range(len(l) - 1):
-        res += weights[(l[i], l[i+1])]
-    return res
-
-
 def backtrace(parent, start, end):
     path = [end]
     while path[-1] != start:
@@ -88,3 +81,9 @@ def backtrace(parent, start, end):
     path.reverse()
     return path
 
+
+def get_path_weight(l: list, weights):
+    res = 0
+    for i in range(len(l) - 1):
+        res += weights[(l[i], l[i+1])]
+    return res

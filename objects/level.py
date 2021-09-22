@@ -48,6 +48,7 @@ class Level:
                         self._ladders.append({'x': x, 'y_start': ladder_start, 'y_end': ladder_end, 'level': floor, 'block': (x - 4) // 16 - 2, 'distance': ladder_start - ladder_end})
                         break
 
+        # here we add nodes to the adjacency list and to the weight list
         for i in range((self._level_num + 1) * 12):
             if i % 12 == 0:
                 self._adj_list[i] = [i+1]
@@ -60,6 +61,7 @@ class Level:
                 self._weights[(i, i+1)] = 16
                 self._weights[(i, i-1)] = 16
 
+        # here we calculate the position of the ladder in the graph and add ladders to adjacency list and weight matrix
         for ladder in self._ladders:
             self._adj_list[ladder['level'] * 12 + ladder['block']].append((ladder['level'] + 1) * 12 + ladder['block'])
             self._weights[(ladder['level'] * 12 + ladder['block'], (ladder['level'] + 1) * 12 + ladder['block'])] = ladder['distance']

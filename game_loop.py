@@ -29,6 +29,7 @@ class GameLoop:
         self._kong = Kong(self._level)
         self._surface = pygame.surface.Surface((256, 240))
         self._debug_lines = False
+        self._search_mode = 0
         self._running = True
 
     def _key_handler(self, event: pygame.event.Event):
@@ -44,6 +45,8 @@ class GameLoop:
                     self._mario.next_state('down')
             if event.key == pygame.K_d:
                 self._debug_lines = not self._debug_lines
+            if event.key == pygame.K_z:
+                self._search_mode = (self._search_mode + 1) % 4
             if event.key == pygame.K_SPACE:
                 self.__init__()
                 self.run()
@@ -83,10 +86,6 @@ class GameLoop:
                 end -= 11
 
             while True:
-                print(bfs(self._level._adj_list, self._mario.get_cur_block(), end, self._level._weights))
-                print(dfs(self._level._adj_list, self._mario.get_cur_block(), end, self._level._weights))
-                print(ucs(self._level._adj_list, self._mario.get_cur_block(), end, self._level._weights))
-
                 event = pygame.event.wait(10)
                 if event.type == pygame.QUIT:
                     break
@@ -156,6 +155,18 @@ class GameLoop:
                         pygame.draw.line(self._surface, 'green', (ladder['x'], ladder['y_start']+16), (ladder['x'], ladder['y_end']+16))
                         pygame.draw.line(self._surface, 'green', (ladder['x']+7, ladder['y_start']+16), (ladder['x']+7, ladder['y_end']+16))
 
+                # here we use the algorithms
+                path = []
+                if self._search_mode == 1:
+                    _, path, weight = bfs(self._level._adj_list, self._mario.get_cur_block(), end, self._level._weights)
+                elif self._search_mode == 2:
+                    _, path, weight = dfs(self._level._adj_list, self._mario.get_cur_block(), end, self._level._weights)
+                elif self._search_mode == 3:
+                    _, path, weight = ucs(self._level._adj_list, self._mario.get_cur_block(), end, self._level._weights)
+
+                self._draw_path(path)
+
+
                 # copy buffer contents to screen
                 self._screen.blit(pygame.transform.scale(self._surface, self._screen.get_rect().size), (0, 0))
                 pygame.display.flip()
@@ -163,3 +174,22 @@ class GameLoop:
 
         finally:
             pygame.quit()
+
+    def _get_block_coords(self, block):
+        skips = block // 12
+        x = 44 + (block % 12) * 16
+        # draw line between blocks
+        for y in range(240, 0, -1):
+            if skips:
+                if test_floor({'x': x, 'y': y}):
+                    skips -= 1
+            if not skips:
+                return x - 4 if x - 4 >= 0 else 0, (y - 16) if (y - 16) >= 0 else 0
+
+    def _draw_path(self, path):
+        for i in range(len(path) - 1):
+            try:
+                pygame.draw.line(self._surface, 'yellow', self._get_block_coords(path[i]), self._get_block_coords(path[i+1]))
+            except TypeError:
+                pass
+
