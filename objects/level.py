@@ -18,6 +18,7 @@ class Level:
 
     def _generate(self, level):
         surface = pygame.surface.Surface((256, 240))
+        self._ladders.clear()
 
         # box
         for i in range(32):
@@ -47,7 +48,7 @@ class Level:
                         self._ladders.append({'x': x, 'y_start': ladder_start, 'y_end': ladder_end, 'level': floor, 'block': (x - 4) // 16 - 2, 'distance': ladder_start - ladder_end})
                         break
 
-        for i in range(self._level_num * 12):
+        for i in range((self._level_num + 1) * 12):
             if i % 12 == 0:
                 self._adj_list[i] = [i+1]
                 self._weights[(i, i+1)] = 16

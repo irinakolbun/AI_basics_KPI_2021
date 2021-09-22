@@ -227,6 +227,17 @@ class Mario:
     def get_position(self):
         return self._position['x'], self._position['y']
 
+    def _get_cur_level(self):
+        return 0 if self._position['y'] > (240-57) else (240 - (self._position['y'] + 8)) // 32
+
+    def get_cur_block(self):
+        block = (self._position['x'] - 4) // 16 - 1
+        if block < 0:
+            return 0 + self._get_cur_level() * 12
+        elif block > 11:
+            return 11 + self._get_cur_level() * 12
+        return block + self._get_cur_level() * 12
+
     def fail(self):
         self._set_sprite('fail')
 

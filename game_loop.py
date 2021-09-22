@@ -5,6 +5,7 @@ import os
 from objects.level import Level
 from objects.mario import Mario
 from objects.kong import Kong
+from search import bfs, dfs, ucs
 
 from utils import test_floor
 
@@ -69,12 +70,23 @@ class GameLoop:
 
             level_map = [['#' for y in range(12)] for x in range(self._levels)]
             for ladder in self._level.get_ladders():
-                level_map[self._levels - ladder['level'] - 1][ladder['block']] = '|'
+                try:
+                    level_map[self._levels - ladder['level'] - 1][ladder['block']] = '|'
+                except IndexError:
+                    pass
             print('\n'.join(str(x) for x in level_map), self._level.get_ladders(), '\n')
             print(self._level._adj_list)
             print(self._level._weights)
 
+            end = max(self._level._adj_list.keys())
+            if (end + 1) % 24 == 0:
+                end -= 11
+
             while True:
+                print(bfs(self._level._adj_list, self._mario.get_cur_block(), end, self._level._weights))
+                print(dfs(self._level._adj_list, self._mario.get_cur_block(), end, self._level._weights))
+                print(ucs(self._level._adj_list, self._mario.get_cur_block(), end, self._level._weights))
+
                 event = pygame.event.wait(10)
                 if event.type == pygame.QUIT:
                     break
