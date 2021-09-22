@@ -19,6 +19,7 @@ class GameLoop:
         self._gameover_text = font.render('Game Over!', False, (0xFF, 0xA5, 0x00))
         self._win_text = font.render('Win!', False, (0xFF, 0xA5, 0x00))
         font = pygame.font.SysFont('Comic Sans MS', 24)
+        self._info_font = pygame.font.SysFont('Comic Sans MS', 12)
         self._space_text = font.render('Press Space to restart', False, (0xFF, 0xA5, 0x00))
 
         self._levels = random.choice([2, 3, 4])
@@ -157,14 +158,18 @@ class GameLoop:
 
                 # here we use the algorithms
                 path = []
+                text = ''
                 if self._search_mode == 1:
-                    _, path, weight = bfs(self._level._adj_list, self._mario.get_cur_block(), end, self._level._weights)
+                    text, path, weight = bfs(self._level._adj_list, self._mario.get_cur_block(), end, self._level._weights)
                 elif self._search_mode == 2:
-                    _, path, weight = dfs(self._level._adj_list, self._mario.get_cur_block(), end, self._level._weights)
+                    text, path, weight = dfs(self._level._adj_list, self._mario.get_cur_block(), end, self._level._weights)
                 elif self._search_mode == 3:
-                    _, path, weight = ucs(self._level._adj_list, self._mario.get_cur_block(), end, self._level._weights)
+                    text, path, weight = ucs(self._level._adj_list, self._mario.get_cur_block(), end, self._level._weights)
+                if text:
+                    text += f' {weight}px'
 
                 self._draw_path(path)
+                self._surface.blit(self._info_font.render(text, False, (0x0, 0xff, 0x00)), (20, 16))
 
 
                 # copy buffer contents to screen
@@ -176,7 +181,7 @@ class GameLoop:
             pygame.quit()
 
     def _get_block_coords(self, block):
-        skips = block // 12
+        skips = block // 12 + 1
         x = 44 + (block % 12) * 16
         # draw line between blocks
         for y in range(240, 0, -1):
@@ -184,7 +189,7 @@ class GameLoop:
                 if test_floor({'x': x, 'y': y}):
                     skips -= 1
             if not skips:
-                return x - 4 if x - 4 >= 0 else 0, (y - 16) if (y - 16) >= 0 else 0
+                return x - 4, y + 16
 
     def _draw_path(self, path):
         for i in range(len(path) - 1):
