@@ -10,6 +10,7 @@ from objects.level import Level
 
 class Barrel:
     def __init__(self, level):
+        self._last_path = []
         self._small_sprite_wh = 16
         self._big_sprite_wh = 32
         self._sprites = SpriteSheet('sprites/enemies.png')
@@ -70,6 +71,7 @@ class Barrel:
                 if ladder['y_end'] - 1 <= self._position['y'] <= ladder['y_end']:
                     path_to_mario = a_star_search(self._level._barrel_adj_list, self.get_cur_block(), mario_block, self._level._barrel_weights)[1]
                     print(path_to_mario)
+                    self._last_path = path_to_mario
                     if path_to_mario and len(path_to_mario) > 1:
                         # if random.random() <= self._fall_chance:
                         if abs(path_to_mario[0] - path_to_mario[1]) != 1:

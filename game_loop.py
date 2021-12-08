@@ -200,6 +200,9 @@ class GameLoop:
 
 
                 self._draw_path(path)
+                for barrel in self._kong.get_barrels():
+                    self._draw_path(barrel._last_path, 'blue')
+
                 self._surface.blit(self._info_font.render(text, False, (0x0, 0xff, 0x00)), (20, 16))
 
                 # for block in range(60):
@@ -226,10 +229,10 @@ class GameLoop:
                 return x - 4, y + 16
         return x - 4, 256
 
-    def _draw_path(self, path):
+    def _draw_path(self, path, color='yellow'):
         for i in range(len(path) - 1):
             try:
-                pygame.draw.line(self._surface, 'yellow', self._get_block_coords(path[i]), self._get_block_coords(path[i+1]))
+                pygame.draw.line(self._surface, color, self._get_block_coords(path[i]), self._get_block_coords(path[i+1]))
             except TypeError:
                 pass
 
