@@ -84,6 +84,12 @@ class Level:
         self._barrel_adj_list[24].append(12)
         self._barrel_adj_list[47].append(35)
         self._barrel_adj_list[48].append(36)
+        for i, j in ((0, 23), (23, 24), (24, 47), (47, 48)):
+            try:
+                self._barrel_adj_list[i].remove(j)
+            except:
+                pass
+
 
         self._barrel_weights[(11, 23)] = 1
         self._barrel_weights[(12, 24)] = 1
