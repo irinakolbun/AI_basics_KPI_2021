@@ -61,7 +61,8 @@ class Mario:
 
     def next_state(self, state):
         self._state_transitions.get((self._state, state),
-                                    lambda: print(f'No state transition "{self._state} => {state}"'))()
+                                    lambda: [])()
+                                    # lambda: print(f'No state transition "{self._state} => {state}"'))()
 
     def get_moving_state(self):
         return self._move_state
@@ -134,7 +135,6 @@ class Mario:
                     self._stand()
 
     def _set_stand(self):
-        print('set_stand', self._move_state)
         if self._move_state == 'run':
             self._last_state = 'stand'
 
@@ -198,7 +198,7 @@ class Mario:
         if self._move_state == 'run':
             ladder_found = False
             for ladder in self._level.get_ladders():
-                if ladder['y_start'] == self._position['y'] and ladder['x'] - 7 <= self._position['x'] <= ladder['x']:
+                if ladder['y_start'] == self._position['y'] and ladder['x'] - 10 <= self._position['x'] <= ladder['x'] + 3:
                     self._position['y'] -= 1
                     self._position['x'] = ladder['x'] - 4
                     self._y_speed = self._climb_speed
@@ -231,7 +231,7 @@ class Mario:
         return 0 if self._position['y'] > (240-57) else (240 - (self._position['y'] + 8)) // 32
 
     def get_cur_block(self):
-        block = (self._position['x'] - 4) // 16 - 1
+        block = (self._position['x'] - 8) // 16 - 1
         if block < 0:
             return 0 + self._get_cur_level() * 12
         elif block > 11:

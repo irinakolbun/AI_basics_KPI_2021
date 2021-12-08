@@ -12,7 +12,9 @@ class Level:
         self._barrel_sprite = SpriteSheet('sprites/enemies.png').image_at(pygame.Rect(0, 24, 24, 24), 0).convert_alpha()
         self._ladders = []
         self._adj_list = defaultdict(list)
+        self._barrel_adj_list = defaultdict(list)
         self._weights = defaultdict(lambda: float('+inf'))
+        self._barrel_weights = defaultdict(lambda: float('+inf'))
         self._level_num = level
         self._level = self._generate(level)
 
@@ -50,6 +52,9 @@ class Level:
 
         # here we add nodes to the adjacency list and to the weight list
         for i in range((self._level_num + 1) * 12):
+            self._barrel_adj_list[i] = [i - 1] if (i % 24) <= 11 else [i + 1]
+            self._barrel_weights[(i, i + 1)] = 16
+            self._barrel_weights[(i, i - 1)] = 16
             if i % 12 == 0:
                 self._adj_list[i] = [i+1]
                 self._weights[(i, i+1)] = 16
@@ -61,12 +66,33 @@ class Level:
                 self._weights[(i, i+1)] = 16
                 self._weights[(i, i-1)] = 16
 
+
+
+
         # here we calculate the position of the ladder in the graph and add ladders to adjacency list and weight matrix
         for ladder in self._ladders:
             self._adj_list[ladder['level'] * 12 + ladder['block']].append((ladder['level'] + 1) * 12 + ladder['block'])
             self._weights[(ladder['level'] * 12 + ladder['block'], (ladder['level'] + 1) * 12 + ladder['block'])] = ladder['distance']
             self._weights[((ladder['level'] + 1) * 12 + ladder['block']), ladder['level'] * 12 + ladder['block']] = ladder['distance']
 
+            self._barrel_adj_list[(ladder['level'] + 1) * 12 + ladder['block']].append(ladder['level'] * 12 + ladder['block'])
+            self._barrel_weights[(ladder['level'] * 12 + ladder['block'], (ladder['level'] + 1) * 12 + ladder['block'])] = ladder['distance']
+            self._barrel_weights[((ladder['level'] + 1) * 12 + ladder['block'], ladder['level'] * 12 + ladder['block'])] = ladder['distance']
+
+        # adding ledges for barrels
+        self._barrel_adj_list[23].append(11)
+        self._barrel_adj_list[24].append(12)
+        self._barrel_adj_list[47].append(35)
+        self._barrel_adj_list[48].append(36)
+
+        self._barrel_weights[(11, 23)] = 1
+        self._barrel_weights[(12, 24)] = 1
+        self._barrel_weights[(35, 47)] = 1
+        self._barrel_weights[(36, 48)] = 1
+        self._barrel_weights[(23, 11)] = 1
+        self._barrel_weights[(24, 12)] = 1
+        self._barrel_weights[(47, 35)] = 1
+        self._barrel_weights[(48, 36)] = 1
         # Kong supports
         for i in range(9):
             surface.blit(self._bridge_sprite, (i * 8 + 139, 24+40) if not self._level_num % 2 else (256 - (i * 8 + 139), 24+40))

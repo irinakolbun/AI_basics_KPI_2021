@@ -1,5 +1,7 @@
 from queue import Queue, PriorityQueue
 
+from utils import test_floor
+
 
 def bfs(graph, start, end, weights):
     frontier = Queue()
@@ -74,12 +76,56 @@ def ucs(graph, start, end, weights=None):
                 ))
 
 
+def heuristic(a, b):
+    def _get_block_coords(block):
+        skips = block // 12 + 1
+        x = 44 + (block % 12) * 16
+        # draw line between blocks
+        for y in range(240, 0, -1):
+            if skips:
+                if test_floor({'x': x, 'y': y}):
+                    skips -= 1
+            if not skips:
+                return x - 4, y + 16
+        return x-4, 240+16
+
+    (x1, y1) = _get_block_coords(a)
+    (x2, y2) = _get_block_coords(b)
+    return abs(x1 - x2) + abs(y1 - y2)
+
+
+def a_star_search(graph, start, end, weights):
+    frontier = PriorityQueue()
+    frontier.put(start, 0)
+    came_from = {start: None}
+    cost_so_far = {start: 0}
+
+    while not frontier.empty():
+        current = frontier.get()
+
+        if current == end:
+            break
+
+        for next in graph[current]:
+            new_cost = cost_so_far[current] + ucs_weight(current, next, weights)
+            if next not in cost_so_far or new_cost < cost_so_far[next]:
+                cost_so_far[next] = new_cost
+                priority = new_cost + heuristic(next, end)
+                frontier.put(next, priority)
+                came_from[next] = current
+
+    return "ASTAR", backtrace(came_from, start, end), get_path_weight(backtrace(came_from, start, end), weights)
+
+
 def backtrace(parent, start, end):
-    path = [end]
-    while path[-1] != start:
-        path.append(parent[path[-1]])
-    path.reverse()
-    return path
+    try:
+        path = [end]
+        while path[-1] != start:
+            path.append(parent[path[-1]])
+        path.reverse()
+        return path
+    except KeyError:
+        return []
 
 
 def get_path_weight(l: list, weights):

@@ -1,6 +1,8 @@
 import random
 
 import pygame
+
+from search import a_star_search
 from utils import SpriteSheet, test_floor
 from pygame.rect import Rect
 from objects.level import Level
@@ -59,17 +61,21 @@ class Barrel:
             self._animation_advance += advance
         return self._animations[self._animation_state][self._animation_frame]['sprite']
 
-    def move(self):
+    def move(self, mario_block):
         if self.get_position() == (16, 224):
             self._position['y'] += 1
 
         for ladder in self._level.get_ladders():
             if self._position['x'] == ladder['x']:
                 if ladder['y_end'] - 1 <= self._position['y'] <= ladder['y_end']:
-                    if random.random() <= self._fall_chance:
-                        self._x_speed = 0
-                        self._x_advance = 0
-                        self._position['y'] += 2
+                    path_to_mario = a_star_search(self._level._barrel_adj_list, self.get_cur_block(), mario_block, self._level._barrel_weights)[1]
+                    print(path_to_mario)
+                    if path_to_mario and len(path_to_mario) > 1:
+                        # if random.random() <= self._fall_chance:
+                        if abs(path_to_mario[0] - path_to_mario[1]) != 1:
+                            self._x_speed = 0
+                            self._x_advance = 0
+                            self._position['y'] += 2
 
         # x movement
         self._x_advance += self._x_speed
@@ -115,3 +121,16 @@ class Barrel:
                 {'sprite': self._rolling_2, 'duration': 0.1},
             ],
         }
+
+    def get_cur_block(self):
+        block = (self._position['x'] - 8) // 16 - 1
+        if block < 0:
+            return 0 + self._get_cur_level() * 12
+        elif block > 11:
+            return 11 + self._get_cur_level() * 12
+        return block + self._get_cur_level() * 12
+
+    def _get_cur_level(self):
+        return 0 if self._position['y'] > (240-57) else (240 - (self._position['y'] + 8)) // 32
+
+

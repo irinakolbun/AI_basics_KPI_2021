@@ -5,7 +5,7 @@ import os
 from objects.level import Level
 from objects.mario import Mario
 from objects.kong import Kong
-from search import bfs, dfs, ucs
+from search import bfs, dfs, ucs, a_star_search
 
 from utils import test_floor
 
@@ -30,8 +30,9 @@ class GameLoop:
         self._kong = Kong(self._level)
         self._surface = pygame.surface.Surface((256, 240))
         self._debug_lines = False
-        self._search_mode = 0
+        self._search_mode = 1
         self._running = True
+        self._move_advance = 0
 
     def _key_handler(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
@@ -111,7 +112,7 @@ class GameLoop:
                 # update barrels
                 for barrel in self._kong.get_barrels():
                     if self._running:
-                        barrel.move()
+                        barrel.move(self._mario.get_cur_block())
                     barrel_pos = barrel.get_position()
                     self._surface.blit(barrel.get_cur_sprite(self._clock.get_time()), barrel_pos)
 
@@ -168,8 +169,41 @@ class GameLoop:
                 if text:
                     text += f' {weight}px'
 
+                # make Mario move by path
+                self._move_advance += self._clock.get_time()
+                if path and self._move_advance >= 150:
+                    self._move_advance = 0
+                    try:
+                        if path[0] - path[1] == -1:
+                            self._mario.next_state('stand')
+                            self._mario.next_state('go_right')
+                        elif path[0] - path[1] == 1:
+                            self._mario.next_state('stand')
+                            self._mario.next_state('go_left')
+                        elif path[0] - path[1] < 1:
+                            if self._mario.get_position()[0] == 16:
+                                self._mario.next_state('stand')
+                                self._mario.next_state('go_right')
+                            else:
+                                self._mario.next_state('stand')
+                                self._mario.next_state('jump')
+                        elif path[0] - path[1] > 1:
+                            self._mario.next_state('stand')
+                            self._mario.next_state('down')
+                    except IndexError:
+                        if path[0] == 0:
+                            self._mario.next_state('stand')
+                            self._mario.next_state('go_left')
+                        else:
+                            self._mario.next_state('stand')
+                            self._mario.next_state('go_right')
+
+
                 self._draw_path(path)
                 self._surface.blit(self._info_font.render(text, False, (0x0, 0xff, 0x00)), (20, 16))
+
+                # for block in range(60):
+                #     self._surface.blit(self._info_font.render(str(block), False, (0x0, 0xff, 0x00)), self._get_block_coords(block))
 
 
                 # copy buffer contents to screen
@@ -186,10 +220,11 @@ class GameLoop:
         # draw line between blocks
         for y in range(240, 0, -1):
             if skips:
-                if test_floor({'x': x, 'y': y}):
+                if test_floor({'x': x-8, 'y': y}):
                     skips -= 1
             if not skips:
                 return x - 4, y + 16
+        return x - 4, 256
 
     def _draw_path(self, path):
         for i in range(len(path) - 1):
