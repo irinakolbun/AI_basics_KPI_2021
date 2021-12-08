@@ -26,7 +26,7 @@ class Kong:
         self._state = 'stand'
 
         self._barrel_rate = 15
-        self._time_advance = 0
+        self._time_advance = 30
         self._barrel_throw_time = 1.5
         self._barrel_throw_at = 1
         self._max_barrels = 4

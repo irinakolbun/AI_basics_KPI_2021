@@ -205,8 +205,8 @@ class GameLoop:
 
                 self._surface.blit(self._info_font.render(text, False, (0x0, 0xff, 0x00)), (20, 16))
 
-                for block in range(60):
-                    self._surface.blit(self._info_font.render(str(block), False, (0x0, 0xff, 0x00)), self._get_block_coords(block))
+                # for block in range(60):
+                #     self._surface.blit(self._info_font.render(str(block), False, (0x0, 0xff, 0x00)), self._get_block_coords(block))
 
 
                 # copy buffer contents to screen
