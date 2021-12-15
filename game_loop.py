@@ -1,4 +1,6 @@
+import csv
 import random
+import time
 
 import pygame
 import os
@@ -21,7 +23,7 @@ class GameLoop:
         font = pygame.font.SysFont('Comic Sans MS', 24)
         self._info_font = pygame.font.SysFont('Comic Sans MS', 12)
         self._space_text = font.render('Press Space to restart', False, (0xFF, 0xA5, 0x00))
-
+        self._score = 0
         self._levels = random.choice([2, 3, 4])
         self._screen = pygame.display.set_mode((512, 480), pygame.RESIZABLE)
         self._clock = pygame.time.Clock()
@@ -33,6 +35,16 @@ class GameLoop:
         self._search_mode = 1
         self._running = True
         self._move_advance = 0
+
+    def stats(self, row):
+        f = open('stats.csv', 'a', newline='')
+        writer = csv.writer(f)
+        writer.writerow(row)
+        f.close()
+
+    def restart(self):
+        self.__init__()
+        self.run()
 
     def _key_handler(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
@@ -87,7 +99,12 @@ class GameLoop:
             if (end + 1) % 24 == 0:
                 end -= 11
 
+            start = time.time()
             while True:
+                if time.time() - start > 150:
+                    self.stats(['loose', round((time.time() - start) * 100) / 100, self._score, 'minimax'])
+                    self.restart()
+
                 event = pygame.event.wait(10)
                 if event.type == pygame.QUIT:
                     break
@@ -122,7 +139,10 @@ class GameLoop:
                             self._running = False
                             level.blit(self._gameover_text, (40, 10))
                             level.blit(self._space_text, (0, 60))
+                            fin = time.time()
+                            self.stats(['loose', round((fin - start) * 100) / 100, self._score, 'minimax'])
                             self._mario.fail()
+                            self.restart()
 
                     if self._debug_lines:
                         pygame.draw.line(self._surface, 'white', barrel_pos, (barrel_pos[0] + 11, barrel_pos[1]))
@@ -141,7 +161,9 @@ class GameLoop:
                     self._running = False
                     level.blit(self._win_text, (80, 10))
                     level.blit(self._space_text, (0, 60))
-
+                    fin = time.time()
+                    self.stats(['win', round((fin - start) * 100) / 100, self._score + max([0, ((60*3 - round((fin - start)) )) * 10]), 'minimax'])
+                    self.restart()
                 # debug lines
                 if self._debug_lines:
                     for x in range(8, 240-8):
@@ -171,7 +193,17 @@ class GameLoop:
 
                 # make Mario move by path
                 self._move_advance += self._clock.get_time()
-                if path and self._move_advance >= 150:
+
+                jumped = False
+                for barrel in self._kong.get_barrels():
+                    if abs(barrel.get_position()[0] - mario_pos[0]) + abs(barrel.get_position()[1] - mario_pos[1] - 8) < 32:
+                        jumped = True
+                        self._score += 100 if self._mario._state != 'jump' else 0
+                        self._mario.next_state('jump')
+
+                        break
+
+                if path and self._move_advance >= 150 and not jumped:
                     self._move_advance = 0
                     try:
                         if path[0] - path[1] == -1:

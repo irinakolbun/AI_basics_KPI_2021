@@ -1,5 +1,4 @@
 from queue import Queue, PriorityQueue
-
 from utils import test_floor
 
 
@@ -133,3 +132,50 @@ def get_path_weight(l: list, weights):
     for i in range(len(l) - 1):
         res += weights[(l[i], l[i+1])]
     return res
+
+
+class Minimax:
+    def __init__(self, mario, kong, level):
+        self._mario = mario
+        self._kong = kong
+        self._level = level
+        self._max = 1000
+        self._min = -1000
+        self.MIN = -1000
+        self.MAX = 1000
+
+    def minimax(self, depth, nodeIndex, maximizingPlayer, alpha, beta):
+        if depth == 3:
+            return self._level.get_node(nodeIndex, self._mario, self._kong)
+
+        if maximizingPlayer:
+
+            best = self.MIN
+
+            for i in range(0, 2):
+
+                val = self.minimax(depth + 1, nodeIndex * 2 + i,
+                              False, alpha, beta)
+                best = max(best, val)
+                alpha = max(alpha, best)
+
+                # Alpha Beta Pruning
+                if beta <= alpha:
+                    break
+
+            return best
+
+        else:
+            best = self.MAX
+
+            for i in range(0, 2):
+
+                val = self.minimax(depth + 1, nodeIndex * 2 + i,
+                              True, alpha, beta)
+                best = min(best, val)
+                beta = min(beta, best)
+
+                # Alpha Beta Pruning
+                if beta <= alpha:
+                    break
+
