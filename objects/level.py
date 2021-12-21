@@ -1,3 +1,4 @@
+import os
 import random
 from collections import defaultdict
 
@@ -7,6 +8,7 @@ from utils import test_floor, SpriteSheet
 
 class Level:
     def __init__(self, level: int):
+        print(os.getcwd())
         self._bridge_sprite = pygame.image.load('sprites/bridge.png').convert_alpha()
         self._ladder_sprite = pygame.image.load('sprites/ladder.png').convert_alpha()
         self._barrel_sprite = SpriteSheet('sprites/enemies.png').image_at(pygame.Rect(0, 24, 24, 24), 0).convert_alpha()
