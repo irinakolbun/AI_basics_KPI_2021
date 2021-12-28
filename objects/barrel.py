@@ -84,12 +84,12 @@ class Barrel:
         if abs(self._x_advance) >= 1:
             if self._x_advance >= 0:
                 if not self._position['x'] >= 240 - 16:  # left boundary
-                    self._position['x'] += 1
-                self._x_advance -= 1
+                    self._position['x'] += int(self._x_advance)
+                self._x_advance = 0
             else:
                 if not self._position['x'] <= 16:  # right boundary
-                    self._position['x'] -= 1
-                self._x_advance += 1
+                    self._position['x'] += int(self._x_advance)
+                self._x_advance = 0
 
         # y movement
         self._y_advance += self._y_velocity

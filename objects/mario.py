@@ -84,13 +84,13 @@ class Mario:
             self._move_state = 'run'
             if self._x_advance >= 0:
                 if not self._position['x'] >= 240 - 16:  # left boundary
-                    self._position['x'] += 1
-                self._x_advance -= 1
+                    self._position['x'] += int(self._x_advance)
+                self._x_advance = 0
 
             else:
                 if not self._position['x'] <= 16:  # right boundary
-                    self._position['x'] -= 1
-                self._x_advance += 1
+                    self._position['x'] += int(self._x_advance)
+                self._x_advance = 0
 
         # y movement
         if self._move_state == 'run':
